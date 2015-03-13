@@ -1,4 +1,53 @@
-var _ = require('underscore');
+/**
+ * Make a request
+ *
+ * @param string item
+ *
+ * @response Parse.Object request
+ */
+Parse.Cloud.define('request', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
+  // Params
+  var user = request.user;
+  var itemName = request.params.item;
+
+  // Query item
+  var item = new Parse.Object('Item');
+  var query = new Parse.Query('Item');
+
+  query.equalTo('nameLowercase', itemName.toLowerCase());
+
+  // Item exists? If not, create it
+  query.first().then(function(result) {
+    item = result;
+
+    return Parse.Promise.as(item);
+  }, function() {
+    // Capitalize item name
+    itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1);
+
+    item.set('name', itemName);
+    item.set('nameLowercase', itemName.toLowerCase());
+
+    return item.save();
+  }).then(function() {
+    // Create request
+    var req = new Parse.Object('Request');
+
+    req.set('author', user);
+    req.set('item', item);
+    req.set('open', false);
+
+    return req.save();
+  }).then(function(req) {
+    // Decrement requests limit from user
+    user.increment('requestsLimit', -1);
+    user.save();
+
+    response.success(req);
+  }, response.error);
+});
 
 /**
  * Get requests
@@ -172,4 +221,3 @@ Parse.Cloud.define('close', function(request, response) {
     }
   }).then(response.success, response.error);
 });
-
