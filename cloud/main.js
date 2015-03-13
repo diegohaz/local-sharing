@@ -253,3 +253,30 @@ Parse.Cloud.define('sendMessage', function(request, response) {
     return message.save();
   }).then(response.success, response.error);
 });
+
+/**
+ * Get messages
+ *
+ * @param string requestId
+ * @param int optional limit
+ * @param int optional page
+ *
+ * @response array List of messages
+ */
+Parse.Cloud.define('getMessages', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
+  // Params
+  var requestId = request.params.requestId;
+  var limit = request.params.limit || 30;
+  var page = request.params.page || 1;
+
+  // Query
+  var query = new Parse.Query('Message');
+  query.include('request');
+  query.descending('createdAt');
+  query.limit(limit);
+  query.skip((page - 1) * limit);
+
+  query.find().then(response.success, response.success);
+});
