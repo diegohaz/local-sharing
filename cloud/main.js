@@ -6,11 +6,13 @@ var _ = require('underscore');
  * @param int optional limit
  * @param int optional page
  *
- * @todo order requests by user's genre, course and inventory.
+ * @todo Order requests by user's genre, course and inventory.
  *
- * @response array list of request objects
+ * @response array List of request objects
  */
-Parse.Cloud.define('requests', function(request, response) {
+Parse.Cloud.define('getRequests', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
   // Params
   var genre = request.user.get('genre');
   var course = request.user.get('course');
@@ -38,6 +40,8 @@ Parse.Cloud.define('requests', function(request, response) {
  * @response void
  */
 Parse.Cloud.define('respond', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
   // Params
   var helper = request.user;
   var hasItem = request.params.hasItem || true;
@@ -46,7 +50,6 @@ Parse.Cloud.define('respond', function(request, response) {
   var query = new Parse.Query('Request');
 
   query.get(request.params.requestId).then(function(req) {
-    // If user respond that he has item and request is open
     if (hasItem && !req.get('open')) {
       // Add item to user's inventory
       helper.addUnique('inventory', req.get('item'));
@@ -56,17 +59,13 @@ Parse.Cloud.define('respond', function(request, response) {
       req.set('open', true);
       req.set('helper', helper);
       return req.save();
-    }
-    // If user respond that he hasn't
-    else if (!hasItem) {
+    } else if (!hasItem) {
       // Remove item from user's inventory and add to user's hasNot list
       helper.remove('inventory', req.get('item'));
       helper.addUnique('hasNot', req.get('item'));
 
       return helper.save();
-    }
-    // If request isn't open
-    else {
+    } else {
       return Parse.Promise.error();
     }
   }).then(function() {
@@ -74,4 +73,39 @@ Parse.Cloud.define('respond', function(request, response) {
   }, function() {
     response.error();
   });
+});
+
+/**
+ * Get user's open requests
+ *
+ * @param int optional limit
+ * @param int optional page
+ *
+ * @todo Archive old requests
+ *
+ * @response array List of request objects
+ */
+Parse.Cloud.define('getOpenRequests', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
+  // Params
+  var limit = request.params.limit || 30;
+  var page = request.params.page || 1;
+
+  // Query
+  var isHelper = new Parse.Query('Request');
+  isHelper.equalTo('helper', request.user);
+
+  var isAuthor = new Parse.Query('Request');
+  isAuthor.equalTo('author', request.user);
+
+  // Combined query
+  var query = Parse.Query.or(isHelper, isAuthor);
+  query.equalTo('open', true);
+  query.include(['author', 'item']);
+  query.ascending('updatedAt');
+  query.limit(limit);
+  query.skip((page - 1) * limit);
+
+  query.find().then(response.success, response.error);
 });
