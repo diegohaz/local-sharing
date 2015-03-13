@@ -1,0 +1,11 @@
+{
+    "applications": {
+        "Local Sharing": {
+            "applicationId": "DBJSfJTRhzZ0IeCFZDnIq9oLblLUU4sdHrRScito", 
+            "masterKey": "nyppw6FltvqrxT2vpDZ1zLjlgHc8qTP9Gd1GhSpT"
+        }, 
+        "_default": {
+            "link": "Local Sharing"
+        }
+    }
+}
