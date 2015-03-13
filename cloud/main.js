@@ -1,7 +1,3 @@
-Parse.Cloud.beforeSave(Parse.User, function(request, response) {
-
-});
-
 /**
  * Make a request
  *
