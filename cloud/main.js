@@ -66,7 +66,8 @@ Parse.Cloud.define('getRequests', function(request, response) {
   var genre = request.user.get('genre');
   var course = request.user.get('course');
   var location = request.user.get('location');
-  var inventory = request.user.get('inventory');
+  var has = request.user.get('has');
+  var hasNot = request.user.get('hasNot');
   var limit = request.params.limit || 30;
   var page = request.params.page || 1;
 
@@ -165,7 +166,7 @@ Parse.Cloud.define('respond', function(request, response) {
   query.get(requestId).then(function(req) {
     if (hasItem && !req.get('open')) {
       // Add item to user's inventory
-      helper.addUnique('inventory', req.get('item'));
+      helper.addUnique('has', req.get('item'));
       helper.save();
 
       // Change request's state
@@ -174,7 +175,7 @@ Parse.Cloud.define('respond', function(request, response) {
       return req.save();
     } else if (!hasItem) {
       // Remove item from user's inventory and add to user's hasNot list
-      helper.remove('inventory', req.get('item'));
+      helper.remove('has', req.get('item'));
       helper.addUnique('hasNot', req.get('item'));
 
       return helper.save();
