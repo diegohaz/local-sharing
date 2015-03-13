@@ -1,3 +1,7 @@
+Parse.Cloud.beforeSave(Parse.User, function(request, response) {
+
+});
+
 /**
  * Make a request
  *
@@ -55,7 +59,7 @@ Parse.Cloud.define('request', function(request, response) {
  * @param int optional limit
  * @param int optional page
  *
- * @todo Order requests by user's genre, course and inventory.
+ * @todo Order requests by user's gender, course and inventory.
  *
  * @response array List of request objects
  */
@@ -63,7 +67,7 @@ Parse.Cloud.define('getRequests', function(request, response) {
   Parse.Cloud.useMasterKey();
 
   // Params
-  var genre = request.user.get('genre');
+  var gender = request.user.get('gender');
   var course = request.user.get('course');
   var location = request.user.get('location');
   var has = request.user.get('has');
