@@ -222,3 +222,34 @@ Parse.Cloud.define('close', function(request, response) {
     }
   }).then(response.success, response.error);
 });
+
+/**
+ * Send message
+ *
+ * @param string requestId
+ * @param string content
+ *
+ * @response void
+ */
+Parse.Cloud.define('sendMessage', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
+  // Params
+  var requestId = request.params.requestId;
+  var content = request.params.content;
+  var from = request.user;
+
+  // Request
+  var query = new Parse.Query('Request');
+
+  query.get(requestId).then(function(req) {
+    // Message
+    var message = new Parse.Object('Message');
+
+    message.set('request', req);
+    message.set('from', from);
+    message.set('content', content);
+
+    return message.save();
+  }).then(response.success, response.error);
+});
