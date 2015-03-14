@@ -20,18 +20,19 @@ Parse.Cloud.define('request', function(request, response) {
 
   // Item exists? If not, create it
   query.first().then(function(result) {
-    item = result;
+    if (result) {
+      item = result;
+      return Parse.Promise.as(item);
+    } else {
+      // Capitalize item name
+      itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1);
 
-    return Parse.Promise.as(item);
-  }, function() {
-    // Capitalize item name
-    itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1);
+      item.set('name', itemName);
+      item.set('nameLowercase', itemName.toLowerCase());
 
-    item.set('name', itemName);
-    item.set('nameLowercase', itemName.toLowerCase());
-
-    return item.save();
-  }).then(function() {
+      return item.save();
+    }
+  }).then(function(item) {
     // Create request
     var req = new Parse.Object('Request');
 
