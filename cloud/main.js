@@ -299,19 +299,26 @@ Parse.Cloud.define('cancel', function(request, response) {
  * @response void
  */
 Parse.Cloud.define('sendMessage', function(request, response) {
+  Parse.Cloud.useMasterKey();
+
   // Params
   var requestId = request.params.requestId;
   var content = request.params.content;
   var from = request.user;
 
+  // Query
+  var isHelper = new Parse.Query('Request');
+  isHelper.equalTo('helper', from);
+
+  var isAuthor = new Parse.Query('Request');
+  isAuthor.equalTo('author', from);
+
   // Request
-  var query = new Parse.Query('Request');
-  query.include(['author', 'helper'])
+  var query = Parse.Query.or(isHelper, isAuthor);
+  query.include(['author', 'helper']);
 
   query.get(requestId).then(function(req) {
-    if (req.get('open')) {
-      return Parse.Promise.error('Request is not active');
-    } else {
+    if (req.get('helper')) {
       // Message
       var message = new Parse.Object('Message');
       var acl = new Parse.ACL();
@@ -319,14 +326,17 @@ Parse.Cloud.define('sendMessage', function(request, response) {
       acl.setPublicReadAccess(false);
       acl.setPublicWriteAccess(false);
       acl.setWriteAccess(from, true);
-      acl.setReadAccess(req.get('author').id, true);
-      acl.setReadAccess(req.get('helper').id, true);
+      acl.setReadAccess(req.get('author'), true);
+      acl.setReadAccess(req.get('helper'), true);
 
+      message.setACL(acl);
       message.set('request', req);
       message.set('from', from);
       message.set('content', content);
 
       return message.save();
+    } else {
+      return Parse.Promise.error('Missing helper');
     }
   }).then(response.success, response.error);
 });
