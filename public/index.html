@@ -29,17 +29,13 @@
             alert("User signed up and logged in through Facebook!");
           } else {
             alert("User logged in through Facebook!");
-            console.log(user);
-
-            FB.api("/me", function (response) {
-              if (response && !response.error) {
-                console.log(response);
-                var img = document.createElement('img');
-                img.setAttribute('src', '//graph.facebook.com/'+response.id+'/picture?type=large');
-                document.getElementsByTagName('body')[0].appendChild(img);
-              }
-            });
           }
+
+          console.log(user);
+
+          var img = document.createElement('img');
+          img.setAttribute('src', user.get('photo') + '?type=large');
+          document.getElementsByTagName('body')[0].appendChild(img);
         },
         error: function(user, error) {
           alert("User cancelled the Facebook login or did not fully authorize.");

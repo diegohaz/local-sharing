@@ -65,6 +65,7 @@ Parse.Cloud.define('request', function(request, response) {
     req.set('author', user);
     req.set('item', item);
     req.set('open', false);
+    req.set('expired', false);
 
     return req.save();
   }).then(function(req) {
@@ -99,6 +100,7 @@ Parse.Cloud.define('getRequests', function(request, response) {
   // Query
   var query = new Parse.Query('Request');
   query.equalTo('open', false);
+  query.equalTo('expired', false);
   query.include(['author', 'item']);
   query.limit(limit);
   query.skip((page - 1) * limit);
