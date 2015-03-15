@@ -202,7 +202,6 @@ Parse.Cloud.define('respond', function(request, response) {
 
   // Get request
   var query = new Parse.Query('Request');
-
   query.notEqualTo('author', helper);
   query.equalTo('dealing', false);
   query.equalTo('closed', false);
@@ -244,6 +243,7 @@ Parse.Cloud.define('close', function(request, response) {
   // Query request
   var query = new Parse.Query('Request');
   query.include(['helper', 'author']);
+  query.equalTo('closed', false);
 
   query.get(requestId).then(function(req) {
     var helper = req.get('helper');
