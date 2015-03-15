@@ -90,8 +90,6 @@ Parse.Cloud.define('getRequests', function(request, response) {
   Parse.Cloud.useMasterKey();
 
   // Params
-  var gender = request.user.get('gender');
-  var course = request.user.get('course');
   var location = request.user.get('location');
   var has = request.user.get('has');
   var hasNot = request.user.get('hasNot');
@@ -105,7 +103,12 @@ Parse.Cloud.define('getRequests', function(request, response) {
   query.limit(limit);
   query.skip((page - 1) * limit);
 
-  query.near('author.location').then(response.success, response.error);
+  if (location) {
+    query.near('author.location').then(response.success, response.error);
+  } else {
+    query.descending('createdAt');
+    query.find().then(response.success, response.error);
+  }
 });
 
 /**
