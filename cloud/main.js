@@ -203,6 +203,7 @@ Parse.Cloud.define('respond', function(request, response) {
   // Get request
   var query = new Parse.Query('Request');
 
+  query.notEqualTo('author', helper);
   query.equalTo('dealing', false);
   query.equalTo('closed', false);
   query.equalTo('expired', false);
