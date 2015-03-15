@@ -168,6 +168,7 @@ Parse.Cloud.define('getOpenRequests', function(request, response) {
   // Combined query
   var query = Parse.Query.or(isHelper, isAuthor);
   query.equalTo('open', true);
+  query.equalTo('expired', false);
   query.include(['author', 'item']);
   query.ascending('updatedAt');
   query.limit(limit);
