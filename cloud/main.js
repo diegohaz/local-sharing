@@ -65,7 +65,13 @@ Parse.Cloud.define('request', function(request, response) {
   }).then(function(item) {
     // Create request
     var req = new Parse.Object('Request');
+    var acl = new Parse.ACL();
 
+    acl.setPublicReadAccess(true);
+    acl.setPublicWriteAccess(false);
+    acl.setWriteAccess(user, true);
+
+    req.setACL(acl);
     req.set('author', user);
     req.set('item', item);
     req.set('open', false);
@@ -92,8 +98,6 @@ Parse.Cloud.define('request', function(request, response) {
  * @response array List of request objects
  */
 Parse.Cloud.define('getRequests', function(request, response) {
-  Parse.Cloud.useMasterKey();
-
   // Params
   var location = request.user.get('location');
   var has = request.user.get('has');
@@ -128,8 +132,6 @@ Parse.Cloud.define('getRequests', function(request, response) {
  * @response array List of request objects
  */
 Parse.Cloud.define('getUserRequests', function(request, response) {
-  Parse.Cloud.useMasterKey();
-
   // Params
   var limit = request.params.limit || 30;
   var page = request.params.page || 1;
@@ -156,8 +158,6 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
  * @response array List of request objects
  */
 Parse.Cloud.define('getOpenRequests', function(request, response) {
-  Parse.Cloud.useMasterKey();
-
   // Params
   var limit = request.params.limit || 30;
   var page = request.params.page || 1;
@@ -173,7 +173,7 @@ Parse.Cloud.define('getOpenRequests', function(request, response) {
   var query = Parse.Query.or(isHelper, isAuthor);
   query.equalTo('open', true);
   query.equalTo('expired', false);
-  query.include(['author', 'item']);
+  query.include(['author', 'helper', 'item']);
   query.ascending('updatedAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
@@ -231,8 +231,6 @@ Parse.Cloud.define('respond', function(request, response) {
  * @response void
  */
 Parse.Cloud.define('close', function(request, response) {
-  Parse.Cloud.useMasterKey();
-
   // Params
   var requestId = request.params.requestId;
   var successful = request.params.successful || true;
@@ -244,13 +242,10 @@ Parse.Cloud.define('close', function(request, response) {
   query.get(requestId).then(function(req) {
     var helper = req.get('helper');
 
-    // Verify if current user is the request author
-    if (request.user.id != req.get('author').id) {
-      return Parse.Promise.error('User is not author.');
-    } else if (successful) {
+    if (req.getACL().getWriteAccess(request.user) && successful) {
       // Increment helper's requests limit
       helper.increment('requestsLimit');
-      helper.save();
+      helper.save(null, {useMasterKey: true});
 
       // Close request
       req.set('open', false);
@@ -272,8 +267,6 @@ Parse.Cloud.define('close', function(request, response) {
  * @response void
  */
 Parse.Cloud.define('sendMessage', function(request, response) {
-  Parse.Cloud.useMasterKey();
-
   // Params
   var requestId = request.params.requestId;
   var content = request.params.content;
@@ -281,16 +274,28 @@ Parse.Cloud.define('sendMessage', function(request, response) {
 
   // Request
   var query = new Parse.Query('Request');
+  query.include(['author', 'helper'])
 
   query.get(requestId).then(function(req) {
-    // Message
-    var message = new Parse.Object('Message');
+    if (req.get('open')) {
+      return Parse.Promise.error('Request is not active');
+    } else {
+      // Message
+      var message = new Parse.Object('Message');
+      var acl = new Parse.ACL();
 
-    message.set('request', req);
-    message.set('from', from);
-    message.set('content', content);
+      acl.setPublicReadAccess(false);
+      acl.setPublicWriteAccess(false);
+      acl.setWriteAccess(from, true);
+      acl.setReadAccess(req.get('author').id, true);
+      acl.setReadAccess(req.get('helper').id, true);
 
-    return message.save();
+      message.set('request', req);
+      message.set('from', from);
+      message.set('content', content);
+
+      return message.save();
+    }
   }).then(response.success, response.error);
 });
 
