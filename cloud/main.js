@@ -239,12 +239,15 @@ Parse.Cloud.define('close', function(request, response) {
 
   // Query request
   var query = new Parse.Query('Request');
-  query.include('helper');
+  query.include(['helper', 'author']);
 
   query.get(requestId).then(function(req) {
     var helper = req.get('helper');
 
-    if (successful) {
+    // Verify if current user is the request author
+    if (request.user.id != req.get('author').id) {
+      return Parse.Promise.error('User is not author.');
+    } else if (successful) {
       // Increment helper's requests limit
       helper.increment('requestsLimit');
       helper.save();
