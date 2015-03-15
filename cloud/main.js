@@ -74,7 +74,8 @@ Parse.Cloud.define('request', function(request, response) {
     req.setACL(acl);
     req.set('author', user);
     req.set('item', item);
-    req.set('open', false);
+    req.set('dealing', false);
+    req.set('closed', false);
     req.set('expired', false);
 
     return req.save();
@@ -107,7 +108,8 @@ Parse.Cloud.define('getRequests', function(request, response) {
 
   // Query
   var query = new Parse.Query('Request');
-  query.equalTo('open', false);
+  query.equalTo('dealing', false);
+  query.equalTo('closed', false);
   query.equalTo('expired', false);
   query.include(['author', 'item']);
   query.limit(limit);
@@ -148,7 +150,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
 });
 
 /**
- * Get user's open requests
+ * Get user's in progress requests
  *
  * @param int optional limit
  * @param int optional page
@@ -157,7 +159,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
  *
  * @response array List of request objects
  */
-Parse.Cloud.define('getOpenRequests', function(request, response) {
+Parse.Cloud.define('getDealingRequests', function(request, response) {
   // Params
   var limit = request.params.limit || 30;
   var page = request.params.page || 1;
@@ -171,7 +173,8 @@ Parse.Cloud.define('getOpenRequests', function(request, response) {
 
   // Combined query
   var query = Parse.Query.or(isHelper, isAuthor);
-  query.equalTo('open', true);
+  query.equalTo('dealing', true);
+  query.equalTo('closed', false);
   query.equalTo('expired', false);
   query.include(['author', 'helper', 'item']);
   query.ascending('updatedAt');
@@ -200,24 +203,26 @@ Parse.Cloud.define('respond', function(request, response) {
   // Get request
   var query = new Parse.Query('Request');
 
+  query.equalTo('dealing', false);
+  query.equalTo('closed', false);
+  query.equalTo('expired', false);
+
   query.get(requestId).then(function(req) {
-    if (hasItem && !req.get('open')) {
+    if (hasItem) {
       // Add item to user's inventory
       helper.addUnique('has', req.get('item'));
       helper.save();
 
       // Change request's state
-      req.set('open', true);
+      req.set('dealing', true);
       req.set('helper', helper);
       return req.save();
-    } else if (!hasItem) {
+    } else {
       // Remove item from user's inventory and add to user's hasNot list
       helper.remove('has', req.get('item'));
       helper.addUnique('hasNot', req.get('item'));
 
       return helper.save();
-    } else {
-      return Parse.Promise.error();
     }
   }).then(response.success, response.error);
 });
@@ -228,7 +233,7 @@ Parse.Cloud.define('respond', function(request, response) {
  * @param string requestId
  * @param bool optional successful
  *
- * @response void
+ * @response Parse.Object request
  */
 Parse.Cloud.define('close', function(request, response) {
   // Params
@@ -248,13 +253,40 @@ Parse.Cloud.define('close', function(request, response) {
       helper.save(null, {useMasterKey: true});
 
       // Close request
-      req.set('open', false);
+      req.set('dealing', false);
+      req.set('closed', true);
       return req.save();
     } else {
-      // Unassign helper and keep request open
-      req.set('helper', null);
+      // Unassign helper and close request
+      req.set('helper', undefined);
+      req.set('dealing', false);
+      req.set('closed', true);
       return req.save();
     }
+  }).then(response.success, response.error);
+});
+
+/**
+ * Cancel a deal
+ *
+ * @param string requestId
+ *
+ * @response void
+ */
+Parse.Cloud.define('cancel', function(request, response) {
+  // Params
+  var requestId = request.params.requestId;
+
+  // Query request
+  var query = new Parse.Query('Request');
+  query.include('author');
+
+  query.get(requestId).then(function(req) {
+    // Unassign helper and close request
+    req.set('helper', undefined);
+    req.set('dealing', false);
+
+    return req.save();
   }).then(response.success, response.error);
 });
 
