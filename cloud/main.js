@@ -1,4 +1,30 @@
 /**
+ * Validate user, call Facebook API for more information
+ */
+ Parse.Cloud.beforeSave(Parse.User, function(request, response) {
+  var user = request.object;
+  var fb = user.get('authData').facebook;
+
+  Parse.Cloud.httpRequest({
+    method: 'GET',
+    url: 'https://graph.facebook.com/' + fb.id,
+    params: {
+      access_token: fb.access_token
+    }
+  }).then(function(httpResponse) {
+    var data = httpResponse.data;
+
+    user.set('name', data.name);
+    user.set('photo', 'https://graph.facebook.com/' + fb.id + '/picture');
+    user.set('requestsLimit', 3);
+    user.set('has', []);
+    user.set('hasNot', []);
+
+    response.success();
+  }, response.error);
+});
+
+/**
  * Make a request
  *
  * @param string item
