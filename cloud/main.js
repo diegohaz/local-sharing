@@ -42,6 +42,11 @@ Parse.Cloud.define('request', function(request, response) {
   var user = request.user;
   var itemName = request.params.item;
 
+  // Verify if user can request
+  if (user.get('requestsLimit') <= 0) {
+    return response.error('User cannot request');
+  }
+
   // Query item
   var item = new Parse.Object('Item');
   var query = new Parse.Query('Item');
