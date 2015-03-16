@@ -146,7 +146,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
   // query
   var query = new Parse.Query('Request');
   query.equalTo('author', request.user);
-  query.include(['author', 'item']);
+  query.include(['author', 'helper', 'item', 'lastMessage']);
   query.descending('createdAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
@@ -181,7 +181,7 @@ Parse.Cloud.define('getDealingRequests', function(request, response) {
   query.equalTo('dealing', true);
   query.equalTo('closed', false);
   query.equalTo('expired', false);
-  query.include(['author', 'helper', 'item']);
+  query.include(['author', 'helper', 'item', 'lastMessage']);
   query.descending('updatedAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
