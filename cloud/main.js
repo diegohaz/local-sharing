@@ -357,8 +357,6 @@ Parse.Cloud.define('sendMessage', function(request, response) {
  * @response array List of messages
  */
 Parse.Cloud.define('getMessages', function(request, response) {
-  Parse.Cloud.useMasterKey();
-
   // Params
   var requestId = request.params.requestId;
   var limit = request.params.limit || 30;
