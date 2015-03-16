@@ -147,7 +147,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
   var query = new Parse.Query('Request');
   query.equalTo('author', request.user);
   query.include(['author', 'item']);
-  query.ascending('createdAt');
+  query.descending('createdAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
 
@@ -182,7 +182,7 @@ Parse.Cloud.define('getDealingRequests', function(request, response) {
   query.equalTo('closed', false);
   query.equalTo('expired', false);
   query.include(['author', 'helper', 'item']);
-  query.ascending('updatedAt');
+  query.descending('updatedAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
 
@@ -365,9 +365,53 @@ Parse.Cloud.define('getMessages', function(request, response) {
   // Query
   var query = new Parse.Query('Message');
   query.include('request');
-  query.descending('createdAt');
+  query.ascending('createdAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
 
   query.find().then(response.success, response.success);
+});
+
+/**
+ * Cloud job to clear expired requests
+ *
+ * @param int optional hours Hours to expire
+ */
+Parse.Cloud.job('clearRequests', function(request, status) {
+  Parse.Cloud.useMasterKey();
+
+  // Params
+  var hours = request.params.hours || 24;
+
+  // Info
+  var hour = 1000 * 60 * 60;
+  var now = Date.now();
+
+  // Query
+  var query = new Parse.Query('Request');
+  query.ascending('createdAt');
+  query.equalTo('expired', false);
+
+  query.find().then(function(requests) {
+    var requestsToExpire = [];
+
+    // Loop through results verifying if it expired
+    for (var i = 0; i < requests.length; i++) {
+      var req = requests[i];
+      var reqTime = req.createdAt.getTime();
+
+      // The difference between current time and request's created time must be
+      // lower than the number of hours to expire, otherwise it expires
+      if (now - reqTime >= hour * hours) {
+        req.set('expired', true);
+        requestsToExpire.push(req);
+      }
+    }
+
+    if (requestsToExpire.length) {
+      return Parse.Object.saveAll(requestsToExpire);
+    } else {
+      return Parse.Promise.as('Nothing to expire');
+    }
+  }).then(status.success, status.error);
 });
