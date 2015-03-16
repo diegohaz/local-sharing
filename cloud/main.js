@@ -340,7 +340,11 @@ Parse.Cloud.define('sendMessage', function(request, response) {
       message.set('from', from);
       message.set('content', content);
 
-      return message.save();
+      return message.save().then(function(message) {
+        // Set message as request's last message
+        req.set('lastMessage', message);
+        return req.save();
+      });
     } else {
       return Parse.Promise.error('Missing helper');
     }
