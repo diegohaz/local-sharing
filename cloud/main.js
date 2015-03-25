@@ -147,7 +147,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
   // query
   var query = new Parse.Query('Request');
   query.equalTo('author', request.user);
-  query.include(['author', 'helper', 'item', 'lastMessage']);
+  query.include(['author', 'helper', 'item']);
   query.descending('createdAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
@@ -182,7 +182,7 @@ Parse.Cloud.define('getDealingRequests', function(request, response) {
   query.equalTo('dealing', true);
   query.equalTo('closed', false);
   query.equalTo('expired', false);
-  query.include(['author', 'helper', 'item', 'lastMessage']);
+  query.include(['author', 'helper', 'item']);
   query.descending('updatedAt');
   query.limit(limit);
   query.skip((page - 1) * limit);
@@ -341,11 +341,7 @@ Parse.Cloud.define('sendMessage', function(request, response) {
       message.set('from', from);
       message.set('content', content);
 
-      return message.save().then(function(message) {
-        // Set message as request's last message
-        req.set('lastMessage', message);
-        return req.save();
-      });
+      return message.save();
     } else {
       return Parse.Promise.error('Missing helper');
     }
