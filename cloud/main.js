@@ -31,9 +31,9 @@
 /**
  * Make a request
  *
- * @param string item
+ * @param {string} item Name of the item
  *
- * @response Parse.Object request
+ * @response {Parse.Object} request
  */
 Parse.Cloud.define('request', function(request, response) {
   Parse.Cloud.useMasterKey();
@@ -96,12 +96,12 @@ Parse.Cloud.define('request', function(request, response) {
 /**
  * Get requests
  *
- * @param int optional limit
- * @param int optional page
+ * @param {int} [limit=30]
+ * @param {int} [page=1]
  *
  * @todo Order requests by user's gender, course and inventory.
  *
- * @response array List of request objects
+ * @response {Parse.Object[]} List of request objects
  */
 Parse.Cloud.define('getRequests', function(request, response) {
   // Params
@@ -132,12 +132,12 @@ Parse.Cloud.define('getRequests', function(request, response) {
 /**
  * Get user's requests
  *
- * @param int optional limit
- * @param int optional page
+ * @param {int} [limit=30]
+ * @param {int} [page=1]
  *
  * @todo Archive old requests
  *
- * @response array List of request objects
+ * @response {array} List of request objects
  */
 Parse.Cloud.define('getUserRequests', function(request, response) {
   // Params
@@ -158,12 +158,12 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
 /**
  * Get user's in progress requests
  *
- * @param int optional limit
- * @param int optional page
+ * @param {int} [limit=30]
+ * @param {int} [page=1]
  *
  * @todo Archive old requests
  *
- * @response array List of request objects
+ * @response {array} List of request objects
  */
 Parse.Cloud.define('getDealingRequests', function(request, response) {
   // Params
@@ -193,8 +193,8 @@ Parse.Cloud.define('getDealingRequests', function(request, response) {
 /**
  * Respond a request
  *
- * @param string requestId
- * @param bool optional hasItem
+ * @param {string} requestId
+ * @param {bool} [hasItem=true]
  *
  * @response void
  */
@@ -236,10 +236,10 @@ Parse.Cloud.define('respond', function(request, response) {
 /**
  * Close a request
  *
- * @param string requestId
- * @param bool optional successful
+ * @param {string} requestId
+ * @param {bool} [successful=true]
  *
- * @response Parse.Object request
+ * @response {Parse.Object} request
  */
 Parse.Cloud.define('close', function(request, response) {
   // Params
@@ -276,7 +276,7 @@ Parse.Cloud.define('close', function(request, response) {
 /**
  * Cancel a deal
  *
- * @param string requestId
+ * @param {string} requestId
  *
  * @response void
  */
@@ -300,8 +300,8 @@ Parse.Cloud.define('cancel', function(request, response) {
 /**
  * Send message
  *
- * @param string requestId
- * @param string content
+ * @param {string} requestId
+ * @param {string} content
  *
  * @response {Parse.Object} message
  */
@@ -355,11 +355,11 @@ Parse.Cloud.define('sendMessage', function(request, response) {
 /**
  * Get messages
  *
- * @param string requestId
- * @param int optional limit
- * @param int optional page
+ * @param {string} requestId
+ * @param {int} [limit=30]
+ * @param {int} [page=1]
  *
- * @response array List of messages
+ * @response {array} List of messages
  */
 Parse.Cloud.define('getMessages', function(request, response) {
   // Params
@@ -380,7 +380,7 @@ Parse.Cloud.define('getMessages', function(request, response) {
 /**
  * Cloud job to clear expired requests
  *
- * @param int optional hours Hours to expire
+ * @param {int} [hours=24] Hours to expire
  */
 Parse.Cloud.job('clearRequests', function(request, status) {
   Parse.Cloud.useMasterKey();
