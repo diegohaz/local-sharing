@@ -303,7 +303,7 @@ Parse.Cloud.define('cancel', function(request, response) {
  * @param string requestId
  * @param string content
  *
- * @response void
+ * @response {Parse.Object} message
  */
 Parse.Cloud.define('sendMessage', function(request, response) {
   Parse.Cloud.useMasterKey();
