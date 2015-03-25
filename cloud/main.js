@@ -3,8 +3,8 @@
  */
  Parse.Cloud.beforeSave(Parse.User, function(request, response) {
   if (!request.object.existed()) {
-    var user = request.object;
-    var fb = user.get('authData').facebook;
+    var user  = request.object;
+    var fb    = user.get('authData').facebook;
 
     Parse.Cloud.httpRequest({
       method: 'GET',
@@ -39,8 +39,8 @@ Parse.Cloud.define('request', function(request, response) {
   Parse.Cloud.useMasterKey();
 
   // Params
-  var user = request.user;
-  var itemName = request.params.item;
+  var user      = request.user;
+  var itemName  = request.params.item;
 
   // Verify if user can request
   if (user.get('requestsLimit') <= 0) {
@@ -48,7 +48,7 @@ Parse.Cloud.define('request', function(request, response) {
   }
 
   // Query item
-  var item = new Parse.Object('Item');
+  var item  = new Parse.Object('Item');
   var query = new Parse.Query('Item');
 
   query.equalTo('nameLowercase', itemName.toLowerCase());
@@ -105,11 +105,12 @@ Parse.Cloud.define('request', function(request, response) {
  */
 Parse.Cloud.define('getRequests', function(request, response) {
   // Params
-  var location = request.user.get('location');
-  var has = request.user.get('has');
-  var hasNot = request.user.get('hasNot');
-  var limit = request.params.limit || 30;
-  var page = request.params.page || 1;
+  //var location = request.user.get('location');
+  //var has = request.user.get('has');
+  //var hasNot = request.user.get('hasNot');
+  var location  = false;
+  var limit     = request.params.limit || 30;
+  var page      = request.params.page || 1;
 
   // Query
   var query = new Parse.Query('Request');
@@ -141,7 +142,7 @@ Parse.Cloud.define('getRequests', function(request, response) {
 Parse.Cloud.define('getUserRequests', function(request, response) {
   // Params
   var limit = request.params.limit || 30;
-  var page = request.params.page || 1;
+  var page  = request.params.page || 1;
 
   // query
   var query = new Parse.Query('Request');
@@ -167,7 +168,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
 Parse.Cloud.define('getDealingRequests', function(request, response) {
   // Params
   var limit = request.params.limit || 30;
-  var page = request.params.page || 1;
+  var page  = request.params.page || 1;
 
   // Query
   var isHelper = new Parse.Query('Request');
@@ -201,9 +202,9 @@ Parse.Cloud.define('respond', function(request, response) {
   Parse.Cloud.useMasterKey();
 
   // Params
-  var helper = request.user;
+  var helper    = request.user;
   var requestId = request.params.requestId;
-  var hasItem = request.params.hasItem || true;
+  var hasItem   = request.params.hasItem || true;
 
   // Get request
   var query = new Parse.Query('Request');
@@ -242,8 +243,8 @@ Parse.Cloud.define('respond', function(request, response) {
  */
 Parse.Cloud.define('close', function(request, response) {
   // Params
-  var requestId = request.params.requestId;
-  var successful = request.params.successful || true;
+  var requestId   = request.params.requestId;
+  var successful  = request.params.successful || true;
 
   // Query request
   var query = new Parse.Query('Request');
@@ -309,8 +310,8 @@ Parse.Cloud.define('sendMessage', function(request, response) {
 
   // Params
   var requestId = request.params.requestId;
-  var content = request.params.content;
-  var from = request.user;
+  var content   = request.params.content;
+  var from      = request.user;
 
   // Query
   var isHelper = new Parse.Query('Request');
@@ -363,8 +364,8 @@ Parse.Cloud.define('sendMessage', function(request, response) {
 Parse.Cloud.define('getMessages', function(request, response) {
   // Params
   var requestId = request.params.requestId;
-  var limit = request.params.limit || 30;
-  var page = request.params.page || 1;
+  var limit     = request.params.limit || 30;
+  var page      = request.params.page || 1;
 
   // Query
   var query = new Parse.Query('Message');
@@ -388,8 +389,8 @@ Parse.Cloud.job('clearRequests', function(request, status) {
   var hours = request.params.hours || 24;
 
   // Info
-  var hour = 1000 * 60 * 60;
-  var now = Date.now();
+  var hour  = 1000 * 60 * 60;
+  var now   = Date.now();
 
   // Query
   var query = new Parse.Query('Request');
