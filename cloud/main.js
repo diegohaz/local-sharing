@@ -293,7 +293,7 @@ Parse.Cloud.define('cancel', function(request, response) {
     req.set('helper', undefined);
     req.set('dealing', false);
 
-    return req.save();
+    return req.save(null, {useMasterKey: true});
   }).then(response.success, response.error);
 });
 
