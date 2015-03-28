@@ -35,7 +35,7 @@
  *
  * @response {Parse.Object} request
  */
-Parse.Cloud.define('request', function(request, response) {
+Parse.Cloud.define('createRequest', function(request, response) {
   Parse.Cloud.useMasterKey();
 
   // Params
@@ -199,7 +199,7 @@ Parse.Cloud.define('getDealingRequests', function(request, response) {
  *
  * @response void
  */
-Parse.Cloud.define('respond', function(request, response) {
+Parse.Cloud.define('respondRequest', function(request, response) {
   Parse.Cloud.useMasterKey();
 
   // Params
@@ -242,7 +242,7 @@ Parse.Cloud.define('respond', function(request, response) {
  *
  * @response {Parse.Object} request
  */
-Parse.Cloud.define('close', function(request, response) {
+Parse.Cloud.define('closeRequest', function(request, response) {
   // Params
   var requestId   = request.params.requestId;
   var successful  = request.params.successful || true;
@@ -281,7 +281,7 @@ Parse.Cloud.define('close', function(request, response) {
  *
  * @response void
  */
-Parse.Cloud.define('cancel', function(request, response) {
+Parse.Cloud.define('cancelDeal', function(request, response) {
   // Params
   var requestId = request.params.requestId;
 
