@@ -355,7 +355,7 @@ Parse.Cloud.define('sendMessage', function(request, response) {
  * @param {int} [limit=30]
  * @param {int} [page=1]
  *
- * @response {array} List of messages
+ * @response {Parse.Object[]} List of messages
  */
 Parse.Cloud.define('getMessages', function(request, response) {
   // Params
@@ -371,6 +371,27 @@ Parse.Cloud.define('getMessages', function(request, response) {
   query.skip((page - 1) * limit);
 
   query.find().then(response.success, response.success);
+});
+
+/**
+ * Get items based on a string
+ *
+ * @param {string} string String for search item
+ * @param {int} [limit=10]
+ *
+ * @response {Parse.Object[]} List of items
+ */
+Parse.Cloud.define('getItems', function(request, response) {
+  // Params
+  var string = request.params.string;
+  var limit  = request.params.limit || 10;
+
+  // Query
+  var query = new Parse.Query('Item');
+  query.contains('nameLowercase', string.toLowerCase());
+  query.limit(limit);
+
+  query.find().then(response.success, response.error);
 });
 
 /**
