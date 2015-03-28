@@ -82,6 +82,7 @@ Parse.Cloud.define('request', function(request, response) {
     req.set('dealing', false);
     req.set('closed', false);
     req.set('expired', false);
+    req.set('expiresAt', new Date(Date.now() + 1000 * 60 * 60 * 24));
 
     return req.save();
   }).then(function(req) {
@@ -396,35 +397,25 @@ Parse.Cloud.define('getItems', function(request, response) {
 
 /**
  * Cloud job to clear expired requests
- *
- * @param {int} [hours=24] Hours to expire
  */
 Parse.Cloud.job('clearRequests', function(request, status) {
   Parse.Cloud.useMasterKey();
 
-  // Params
-  var hours = request.params.hours || 24;
-
-  // Info
-  var hour  = 1000 * 60 * 60;
-  var now   = Date.now();
-
   // Query
   var query = new Parse.Query('Request');
-  query.ascending('createdAt');
+  query.ascending('expiresAt');
   query.equalTo('expired', false);
 
   query.find().then(function(requests) {
     var requestsToExpire = [];
+    var now = Date.now();
 
     // Loop through results verifying if it expired
     for (var i = 0; i < requests.length; i++) {
       var req = requests[i];
-      var reqTime = req.createdAt.getTime();
+      var expiresAt = req.expiresAt.getTime();
 
-      // The difference between current time and request's created time must be
-      // lower than the number of hours to expire, otherwise it expires
-      if (now - reqTime >= hour * hours) {
+      if (now >= expiresAt) {
         req.set('expired', true);
         requestsToExpire.push(req);
       }
