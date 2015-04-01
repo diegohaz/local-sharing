@@ -47,6 +47,11 @@ Parse.Cloud.define('createRequest', function(request, response) {
     return response.error('User cannot request');
   }
 
+  // Validate itemName
+  if (itemName == '') {
+    return response.error('Item name cannot be empty')
+  }
+
   // Query item
   var item  = new Parse.Object('Item');
   var query = new Parse.Query('Item');
@@ -148,6 +153,8 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
   // query
   var query = new Parse.Query('Request');
   query.equalTo('author', request.user);
+  query.equalTo('closed', false);
+  qyert.equalTo('expired', false);
   query.include(['author', 'helper', 'item']);
   query.descending('createdAt');
   query.limit(limit);
