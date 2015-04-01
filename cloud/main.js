@@ -413,7 +413,7 @@ Parse.Cloud.job('clearRequests', function(request, status) {
     // Loop through results verifying if it expired
     for (var i = 0; i < requests.length; i++) {
       var req = requests[i];
-      var expiresAt = req.expiresAt.getTime();
+      var expiresAt = req.get('expiresAt').getTime();
 
       if (now >= expiresAt) {
         req.set('expired', true);
