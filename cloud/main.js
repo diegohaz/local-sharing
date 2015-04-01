@@ -154,7 +154,7 @@ Parse.Cloud.define('getUserRequests', function(request, response) {
   var query = new Parse.Query('Request');
   query.equalTo('author', request.user);
   query.equalTo('closed', false);
-  qyert.equalTo('expired', false);
+  query.equalTo('expired', false);
   query.include(['author', 'helper', 'item']);
   query.descending('createdAt');
   query.limit(limit);
