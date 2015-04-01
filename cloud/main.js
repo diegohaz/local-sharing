@@ -389,7 +389,7 @@ Parse.Cloud.define('getItems', function(request, response) {
 
   // Query
   var query = new Parse.Query('Item');
-  query.contains('nameLowercase', string.toLowerCase());
+  query.startsWith('nameLowercase', string.toLowerCase());
   query.limit(limit);
 
   query.find().then(response.success, response.error);
