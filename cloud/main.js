@@ -238,14 +238,14 @@ Parse.Cloud.define('respondRequest', function(request, response) {
  * Close a request
  *
  * @param {string} requestId
- * @param {bool} [successful=true]
+ * @param {bool} successful
  *
  * @response {Parse.Object} request
  */
 Parse.Cloud.define('closeRequest', function(request, response) {
   // Params
   var requestId   = request.params.requestId;
-  var successful  = request.params.successful || true;
+  var successful  = request.params.successful;
 
   // Query request
   var query = new Parse.Query('Request');
